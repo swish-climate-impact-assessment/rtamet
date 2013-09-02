@@ -211,19 +211,28 @@ Ivan Hanigan
   tamet  <- function(filename, MaxT_column = NA,
                      MaxT_lower = 4.0,
                      MaxT_upper = 50.0,
-                     MinT_column = NA)
+                     MinT_column = NA,
+                     MinT_lower = -12.5,
+                     MinT_upper = 32.0
+                     )
     {
-      #### TODO Check Input File ####
+      #### TODO Check Input File, especially column names and latitude  ####
       input_df  <- read_file(filename)
       #### Run Temperature Checks ####
   #   Discontinuity_in_minT
   #   Discontinuity_in_maxT
+  #   MaxT_outside_limits
       input_df  <- MaxT_outside_limits(input_data_frame = input_df,
                                        MaxT = MaxT_column,
                                        Upper = MaxT_upper,
                                        Lower = MaxT_lower
                                        )
   #   MinT_outside_limits
+      input_df  <- MinT_outside_limits(input_data_frame = input_df,
+                                       MinT = MinT_column,
+                                       Upper = MinT_upper,
+                                       Lower = MinT_lower
+                                       )
   #   MaxT_greater_or_equal_MinT
   #   MaxT_is_close_to_MinT_and_not_ overcast
   
@@ -237,8 +246,11 @@ Ivan Hanigan
       extension  <- get_file_extension(fpath)
       logname  <- gsub(extension, "qc_transgressions_logged.csv",  fpath)
       write.csv(input_df, logname, row.names=FALSE)
-      cat(sprintf("Transgressions logged and written to:\n%s", logname))
-      invisible(logname)
+      cat(sprintf("%s Transgressions logged and written to:\n%s", nrow(input_df), logname))
+      log <- list()
+      log[[1]] <- nrow(input_df)
+      log[[2]] <- logname
+      invisible(log)
     }
 #+end_src
 *** test-tamet
@@ -246,16 +258,17 @@ Ivan Hanigan
 #+begin_src R :session *R* :tangle tests/test-tamet.r :exports none :eval no
   ################################################################
   # name:tamet
-  require(rtamet)
+  #require(rtamet)
   # or
-  #require(devtools)
-  #load_all()
+  require(devtools)
+  load_all()
   fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
   fpath
   df  <- read_file(fpath)
   str(df)
   #debug(tamet)
-  tamet(filename = fpath,MaxT_column = "maxave")
+  log <- tamet(filename = fpath,MaxT_column = "maxave", MinT_column = "minave")
+  log
   #undebug(tamet)
 #+end_src
 *** man-tamet
@@ -277,7 +290,7 @@ Ivan Hanigan
   %- maybe also 'usage' for other objects documented here.
   \arguments{
     \item{filename}{
-      either a path or file in current directory (log will be written to a CSV with same name alongside this file)
+      either a path or file in current directory (log will be written to a CSV with same name alongside this file). 
   %%     ~~Describe \code{x} here~~
   }
       \item{MaxT_column}{
@@ -289,7 +302,8 @@ Ivan Hanigan
   }
   \value{
     The log will be written alongside the original file.
-    The name of the log file will be printed and returned invisibly.
+Invisibly returns a list with number of rows in logfile and path to that file.
+
   %%  ~Describe the value returned
   %%  If it is a LIST, use
   %%  \item{comp1 }{Description of 'comp1'}
@@ -315,8 +329,9 @@ Ivan Hanigan
   require(rtamet)
   fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
   df  <- read_file(fpath)
-  logfile <- tamet(filename = fpath,MaxT_column = "maxave",MaxT_lower=4.0, MaxT_upper=40.0)
-  read_file(logfile)
+  logfile <- tamet(filename = fpath,MaxT_column = "maxave",MaxT_lower=4.0, MaxT_upper=40.0,
+                   MinT_column = "minave")
+  read_file(logfile[[2]])
   
   }
   % Add one or more standard keywords, see file 'KEYWORDS' in the
@@ -332,7 +347,7 @@ Ivan Hanigan
   ################################################################
   # name:MaxT_outside_limits
   MaxT_outside_limits <- function(input_data_frame,
-                                  MaxT = MaxT_column,
+                                  MaxT = "maxt",
                                   Lower = 4.0,
                                   Upper = 50.0)
     {
@@ -362,18 +377,20 @@ Ivan Hanigan
 *** R-MinT_outside_limits
 #+name:MinT_outside_limits
 #+begin_src R :session *R* :tangle R/MinT_outside_limits.r :exports none :eval no
-  ################################################################
-  # name:MinT_outside_limits
-  MinT_outside_limits <- function(input_data_frame,
-                                  MinT = MinT_column,
-                                  Upper = 50.0)
-    {
-      # perform check
-      input_data_frame$MinT_upper_limit_transgression  <- ifelse(input_data_frame[,MinT] > Upper, 1, 0)
-  
-      return(input_data_frame)
-    }
-  
+    ################################################################
+    # name:MinT_outside_limits
+    MinT_outside_limits <- function(input_data_frame,
+                                    MinT = "mint",
+                                    Lower = -12.5,
+                                    Upper = 32.0)
+      {
+        # perform check
+        input_data_frame$MinT_lower_transgression  <- ifelse(input_data_frame[,MinT] < Lower, 1, 0)
+        input_data_frame$MinT_upper_transgression  <- ifelse(input_data_frame[,MinT] > Upper, 1, 0)
+    
+        return(input_data_frame)
+      }
+    
 #+end_src
 *** test-MinT_outside_limits
 #+name:MinT_outside_limits

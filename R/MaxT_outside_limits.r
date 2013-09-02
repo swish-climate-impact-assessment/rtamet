@@ -2,7 +2,7 @@
 ################################################################
 # name:MaxT_outside_limits
 MaxT_outside_limits <- function(input_data_frame,
-                                MaxT = MaxT_column,
+                                MaxT = "maxt",
                                 Lower = 4.0,
                                 Upper = 50.0)
   {
