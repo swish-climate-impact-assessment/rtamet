@@ -26,10 +26,13 @@ tamet  <- function(filename,
 #   MaxT_is_close_to_MinT_and_not_ overcast
 
     #### write report ####
-    input_df  <- input_df$any_transgressions  <- ifelse(
+    input_df$any_transgressions  <- ifelse(
       rowSums(
       input_df[,grep("transgression$", names(input_df))]
       ) > 0, 1, 0
-      ) 
-    write.csv(input_df, file.path())
+      )
+    input_df  <- subset(input_df, any_transgressions > 0)
+    extension  <- get_file_extension(fpath)
+    logname  <- gsub(extension, paste("qc_transgressions_logged.", extension, sep = ""), fpath)
+    write.csv(input_df, logname, row.names=FALSE)
   }
