@@ -1,0 +1,370 @@
+#+TITLE:rtamet 
+#+AUTHOR: Ivan Hanigan
+#+email: ivan.hanigan@anu.edu.au
+#+LaTeX_CLASS: article
+#+LaTeX_CLASS_OPTIONS: [a4paper]
+#+LATEX: \tableofcontents
+-----
+
+* Introduction
+** source documentation
+the software with the meteorology tests is TAMET, available from http://www.apsim.info/Wiki/OtherProducts.ashx and described at
+http://www.apsim.info/Wiki/public/Upload/OtherProducts/Using%20TAMET2.htm
+
+http://www.apsim.info/Products/Utilities.aspx
+This program was originally developed by B. H. Wall of the CSIRO Div. of Tropical Crops and Pastures in 1977. It performs a range of checks on weather files for consistency. It has been adapted to check APSIM .met files and now comes with a GUI.  
+
+Documentation.
+http://www.apsim.info/Portals/0/OtherProducts/Using%20TAMET2.htm
+This program was originally developed by B. H. Wall of the CSIRO Div. of Tropical Crops and Pastures in 1977. While the original fortran implementation would produce a (long winded) report, this more modern version comes as a simple GUI that displays potential errors in place, allowing you to directly edit the data and save your changes.
+
+Using the program is simple – After met files are opened (through the file menu), the data is scanned by pressing the lower right button:
+
+Once the file is scanned, the “prev” and “next” buttons allow you to move quickly between any warnings tamet has found. You can make changes to the data and save it.
+
+Parameters for each of the tests can be changed in the ‘Parameters’ panel. The file needs to be ‘scanned’ again before the results of these changes are seen.
+
+The complete list of tests is listed in the ‘Notes’ panel. A thorough description is provided in Wall’s 1977 document, published as –
+
+Wall, B.H. "TAMET: Computer program for processing meteorological data." CSIRO
+Australia. Division of Tropical Crops and Pastures.Tropical Agronomy Technical Memorandum (1977): No. 4, 13p.
+
+ 
+** DESCRIPTION
+*** COMMENT DESCRIPTION-code
+#+name:DESCRIPTION
+#+begin_src R :session *R* :tangle DESCRIPTION :exports none :eval no :padline no
+Package: rtamet
+Type: Package
+Title: R TAMET meteorology data checks
+Version: 0.1
+Date: 2013-09-02
+Author: ivanhanigan
+Maintainer: <ivan.hanigan@gmail.com>
+Depends: plyr
+Description: R versions ofg TAMET meteorology data checking tools
+License: GPL (>= 2)
+
+#+end_src
+
+** TODO run tests
+#+name:test_project
+#+begin_src R :session *R* :tangle no :exports none :eval no
+  ################################################################
+  # name:test_project
+  require(testthat)
+  test_dir('tests')
+  
+#+end_src
+
+** package doc
+#+name:rtamet-package
+#+begin_src R :session *R* :tangle man/rtamet-package.Rd :exports none :eval no
+  \name{rtamet-package}
+  \alias{rtamet-package}
+  \alias{rtamet}
+  \docType{package}
+  \title{
+  rtamet is an R implementation of the TAMET tool
+  }
+  \description{
+  Tamet examines your met data for a variety of problems. These checks come in two flavours, bounds and discontinuities.
+  
+  The variable is tested against upper and lower bounds and any transgression is logged.
+  }
+  \details{
+  \tabular{ll}{
+  Package: \tab rtamet\cr
+  Type: \tab Package\cr
+  Version: \tab 0.1\cr
+  Date: \tab 2013-09-02\cr
+  License: \tab GPL2\cr
+  }
+  ~~ An overview of how to use the package, including the most important functions ~~
+
+  }
+  \author{
+  Original by APSIM, especially  P deVoil and  J Hargreaves.
+  Maintainer: Who to complain to <ivan.hanigan@gmail.com>
+  
+  }
+  \references{
+  
+  }
+  \keyword{ package }
+  \seealso{
+  ~~ Optional links to other man pages, e.g. ~~
+  ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+  }
+  \examples{
+  ~~ simple examples of the most important functions ~~
+  }
+  
+#+end_src
+
+
+* Functions
+** get_file_extension
+*** R-get_file_extension
+#+name:get_file_extension
+#+begin_src R :session *R* :tangle R/get_file_extension.r :exports none :eval no
+  ################################################################
+  # name:get_file_extension
+  get_file_extension <- function(inputfilepath)
+  {
+      filename <- basename(inputfilepath)
+      filename_split <- strsplit(filename, "\\.")[[1]]
+      ext <- filename_split[length(filename_split)]
+      return(ext)
+  }
+#+end_src
+*** test-get_file_extension
+#+name:get_file_extension
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:get_file_extension
+
+#+end_src
+*** man-get_file_extension
+#+name:get_file_extension
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:get_file_extension
+
+#+end_src
+
+** read_file
+*** R-read_file
+#+name:read_file
+#+begin_src R :session *R* :tangle R/read_file.r :exports none :eval yes :reports none
+  ################################################################
+  # name:read_file
+  
+  read_file <- function(inputfilepath, header=TRUE, sanitise_names = TRUE)
+  {
+  
+    ext <- get_file_extension(inputfilepath)
+    # print(ext)
+  
+    if (ext=="dbf")
+    {
+      data_frame<-read.dbf(inputfilepath,as.is=TRUE)
+    } else if (ext == "dta") {
+      data_frame <- read.dta(inputfilepath)
+    } else if (ext=="csv" || ext=="txt") {
+      csvfilename<-inputfilepath
+      data_frame<-read.csv(csvfilename,stringsAsFactors=FALSE,header=header,
+                           strip.white=TRUE)
+    } else print("Unknown extension")
+  
+    if(sanitise_names)
+      {
+        names(data_frame)<-gsub("\\.","_",names(data_frame))
+        names(data_frame)<-gsub("_+","_",names(data_frame))
+      }
+  
+    return(data_frame)
+  }
+  
+#+end_src
+
+#+RESULTS: read_file
+
+*** test-read_file
+#+name:read_file
+#+begin_src R :session *R* :tangle no :exports none :eval no
+  
+#+end_src
+
+*** man-read_file
+#+name:read_file
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:read_file
+
+#+end_src
+
+** tamet
+*** R-tamet
+#+name:tamet
+#+begin_src R :session *R* :tangle R/tamet.r :exports none :eval no
+  ################################################################
+  # name:tamet
+  require(rtamet)
+  tamet  <- function(filename,
+                      MaxT_column = NA
+                     ,
+                     MaxT_lower = 4.0
+                     ,
+                     MaxT_upper = 40
+                     ,
+                      MinT_column = NA)
+    {
+      #### TODO Check Input File ####
+      input_df  <- read_file(filename)
+      #### Run Temperature Checks ####
+  #   Discontinuity_in_minT
+  #   Discontinuity_in_maxT
+      input_df  <- MaxT_outside_limits(input_data_frame = input_df,
+                                       MaxT = MaxT_column,
+                                       Upper = MaxT_upper,
+                                       Lower = MaxT_lower
+                                       )
+  #   MinT_outside_limits
+  #   MaxT_greater_or_equal_MinT
+  #   MaxT_is_close_to_MinT_and_not_ overcast
+  
+      #### write report ####
+      input_df$any_transgressions  <- ifelse(
+        rowSums(
+        input_df[,grep("transgression$", names(input_df))]
+        ) > 0, 1, 0
+        )
+      input_df  <- subset(input_df, any_transgressions > 0)
+      extension  <- get_file_extension(fpath)
+      logname  <- gsub(extension, paste("qc_transgressions_logged.", extension, sep = ""), fpath)
+      write.csv(input_df, logname, row.names=FALSE)
+    }
+#+end_src
+*** test-tamet
+#+name:tamet
+#+begin_src R :session *R* :tangle tests/test-tamet.r :exports none :eval no
+  ################################################################
+  # name:tamet
+  require(rtamet)
+  fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
+  df  <- read_file(fpath)
+  str(df)
+  debug(tamet)
+  out <- tamet(
+  filename = fpath
+  ,
+  MaxT_column = "maxave"
+  )
+#+end_src
+*** man-tamet
+#+name:tamet
+#+begin_src R :session *R* :tangle man/tamet.Rd :exports none :eval no :padline no
+\name{tamet}
+\alias{tamet}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{tamet
+%%  ~~function to do ... ~~
+}
+\description{
+%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+}
+\usage{
+tamet(x)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{x}{
+%%     ~~Describe \code{x} here~~
+}
+}
+\details{
+%%  ~~ If necessary, more details than the description above ~~
+}
+\value{
+%%  ~Describe the value returned
+%%  If it is a LIST, use
+%%  \item{comp1 }{Description of 'comp1'}
+%%  \item{comp2 }{Description of 'comp2'}
+%% ...
+}
+\references{
+%% ~put references to the literature/web site here ~
+}
+\author{
+%%  ~~who you are~~
+}
+\note{
+%%  ~~further notes~~
+}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+%% ~~objects to See Also as \code{\link{help}}, ~~~
+}
+\examples{
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (x) 
+{
+  }
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{ ~kwd1 }
+\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+
+#+end_src
+** MaxT_outside_limits
+*** R-MaxT_outside_limits
+#+name:MaxT_outside_limits
+#+begin_src R :session *R* :tangle R/MaxT_outside_limits.r :exports none :eval no
+  ################################################################
+  # name:MaxT_outside_limits
+  MaxT_outside_limits <- function(input_data_frame,
+                                  MaxT = MaxT_column,
+                                  Lower = 4.0,
+                                  Upper = 50.0)
+    {
+      # perform check
+      input_data_frame$MaxT_lower_transgression  <- ifelse(input_data_frame[,MaxT] < Lower, 1, 0)
+      input_data_frame$MaxT_upper_transgression  <- ifelse(input_data_frame[,MaxT] > Upper, 1, 0)
+  
+      return(input_data_frame)
+    }
+  
+#+end_src
+*** test-MaxT_outside_limits
+#+name:MaxT_outside_limits
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:MaxT_outside_limits
+
+#+end_src
+*** man-MaxT_outside_limits
+#+name:MaxT_outside_limits
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:MaxT_outside_limits
+
+#+end_src
+** MinT_outside_limits
+*** R-MinT_outside_limits
+#+name:MinT_outside_limits
+#+begin_src R :session *R* :tangle R/MinT_outside_limits.r :exports none :eval no
+  ################################################################
+  # name:MinT_outside_limits
+  MinT_outside_limits <- function(input_data_frame,
+                                  MinT = MinT_column,
+                                  Upper = 50.0)
+    {
+      # perform check
+      input_data_frame$MinT_upper_limit_transgression  <- ifelse(input_data_frame[,MinT] > Upper, 1, 0)
+  
+      return(input_data_frame)
+    }
+  
+#+end_src
+*** test-MinT_outside_limits
+#+name:MinT_outside_limits
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:MinT_outside_limits
+
+#+end_src
+*** man-MinT_outside_limits
+#+name:MinT_outside_limits
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:MinT_outside_limits
+
+#+end_src

@@ -1,0 +1,10 @@
+Package: rtamet
+Type: Package
+Title: R TAMET meteorology data checks
+Version: 0.1
+Date: 2013-09-02
+Author: ivanhanigan
+Maintainer: <ivan.hanigan@gmail.com>
+Depends: plyr
+Description: R versions ofg TAMET meteorology data checking tools
+License: GPL (>= 2)
