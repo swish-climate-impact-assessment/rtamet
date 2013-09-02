@@ -2,14 +2,10 @@
 ################################################################
 # name:tamet
 require(rtamet)
-tamet  <- function(filename,
-                    MaxT_column = NA
-                   ,
-                   MaxT_lower = 4.0
-                   ,
-                   MaxT_upper = 40
-                   ,
-                    MinT_column = NA)
+tamet  <- function(filename, MaxT_column = NA,
+                   MaxT_lower = 4.0,
+                   MaxT_upper = 50.0,
+                   MinT_column = NA)
   {
     #### TODO Check Input File ####
     input_df  <- read_file(filename)
@@ -35,4 +31,6 @@ tamet  <- function(filename,
     extension  <- get_file_extension(fpath)
     logname  <- gsub(extension, paste("qc_transgressions_logged.", extension, sep = ""), fpath)
     write.csv(input_df, logname, row.names=FALSE)
+    cat(sprintf("Transgressions logged and written to:\n%s", logname))
+    invisible(logname)
   }

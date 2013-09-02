@@ -204,14 +204,10 @@ Ivan Hanigan
   ################################################################
   # name:tamet
   require(rtamet)
-  tamet  <- function(filename,
-                      MaxT_column = NA
-                     ,
-                     MaxT_lower = 4.0
-                     ,
-                     MaxT_upper = 40
-                     ,
-                      MinT_column = NA)
+  tamet  <- function(filename, MaxT_column = NA,
+                     MaxT_lower = 4.0,
+                     MaxT_upper = 50.0,
+                     MinT_column = NA)
     {
       #### TODO Check Input File ####
       input_df  <- read_file(filename)
@@ -237,6 +233,8 @@ Ivan Hanigan
       extension  <- get_file_extension(fpath)
       logname  <- gsub(extension, paste("qc_transgressions_logged.", extension, sep = ""), fpath)
       write.csv(input_df, logname, row.names=FALSE)
+      cat(sprintf("Transgressions logged and written to:\n%s", logname))
+      invisible(logname)
     }
 #+end_src
 *** test-tamet
@@ -245,77 +243,83 @@ Ivan Hanigan
   ################################################################
   # name:tamet
   require(rtamet)
+  # or
+  #require(devtools)
+  #load_all()
   fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
+  fpath
   df  <- read_file(fpath)
   str(df)
-  debug(tamet)
-  out <- tamet(
-  filename = fpath
-  ,
-  MaxT_column = "maxave"
-  )
+  #debug(tamet)
+  tamet(filename = fpath,MaxT_column = "maxave")
+  #undebug(tamet)
 #+end_src
 *** man-tamet
 #+name:tamet
 #+begin_src R :session *R* :tangle man/tamet.Rd :exports none :eval no :padline no
-\name{tamet}
-\alias{tamet}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{tamet
-%%  ~~function to do ... ~~
-}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
-\usage{
-tamet(x)
-}
-%- maybe also 'usage' for other objects documented here.
-\arguments{
-  \item{x}{
-%%     ~~Describe \code{x} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x) 
-{
+  \name{tamet}
+  \alias{tamet}
+  %- Also NEED an '\alias' for EACH other topic documented here.
+  \title{tamet
+  %%  ~~function to do ... ~~
   }
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
-
+  \description{This is the main function to run the TAMET tests.
+  
+  }
+  \usage{
+  tamet(filename, MaxT_column = NA, MaxT_lower = 4.0, MaxT_upper = 50.0, 
+      MinT_column = NA) 
+  }
+  %- maybe also 'usage' for other objects documented here.
+  \arguments{
+    \item{filename}{
+      either a path or file in current directory (log will be written alongside this file)
+  %%     ~~Describe \code{x} here~~
+  }
+      \item{MaxT_column}{
+       text string with name of relevant column
+  }
+  }
+  \details{
+  %%  ~~ If necessary, more details than the description above ~~
+  }
+  \value{
+    The log will be written alongside the original file.
+    The name of the log file will be printed and returned invisibly.
+  %%  ~Describe the value returned
+  %%  If it is a LIST, use
+  %%  \item{comp1 }{Description of 'comp1'}
+  %%  \item{comp2 }{Description of 'comp2'}
+  %% ...
+  }
+  \references{
+  %% ~put references to the literature/web site here ~
+  }
+  \author{
+  ivanhanigan ported original by apsim
+  }
+  \note{
+  %%  ~~further notes~~
+  }
+  
+  %% ~Make other sections like Warning with \section{Warning }{....} ~
+  
+  \seealso{
+  %% ~~objects to See Also as \code{\link{help}}, ~~~
+  }
+  \examples{
+  require(rtamet)
+  fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
+  df  <- read_file(fpath)
+  logfile <- tamet(filename = fpath,MaxT_column = "maxave",MaxT_lower=4.0, MaxT_upper=40.0)
+  read_file(logfile)
+  
+  }
+  % Add one or more standard keywords, see file 'KEYWORDS' in the
+  % R documentation directory.
+  \keyword{ ~kwd1 }
+  \keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+  
 #+end_src
 ** MaxT_outside_limits
 *** R-MaxT_outside_limits

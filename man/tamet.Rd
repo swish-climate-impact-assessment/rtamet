@@ -4,22 +4,29 @@
 \title{tamet
 %%  ~~function to do ... ~~
 }
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+\description{This is the main function to run the TAMET tests.
+
 }
 \usage{
-tamet(x)
+tamet(filename, MaxT_column = NA, MaxT_lower = 4.0, MaxT_upper = 50.0, 
+    MinT_column = NA) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{
+  \item{filename}{
+    either a path or file in current directory (log will be written alongside this file)
 %%     ~~Describe \code{x} here~~
+}
+    \item{MaxT_column}{
+     text string with name of relevant column
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
+  The log will be written alongside the original file.
+  The name of the log file will be printed and returned invisibly.
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -30,7 +37,7 @@ tamet(x)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+ivanhanigan ported original by apsim
 }
 \note{
 %%  ~~further notes~~
@@ -42,14 +49,12 @@ tamet(x)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--    or do  help(data=index)  for the standard data sets.
+require(rtamet)
+fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
+df  <- read_file(fpath)
+logfile <- tamet(filename = fpath,MaxT_column = "maxave",MaxT_lower=4.0, MaxT_upper=40.0)
+read_file(logfile)
 
-## The function is currently defined as
-function (x) 
-{
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
