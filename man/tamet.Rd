@@ -14,7 +14,7 @@ tamet(filename, MaxT_column = NA, MaxT_lower = 4.0, MaxT_upper = 50.0,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{filename}{
-    either a path or file in current directory (log will be written alongside this file)
+    either a path or file in current directory (log will be written to a CSV with same name alongside this file)
 %%     ~~Describe \code{x} here~~
 }
     \item{MaxT_column}{

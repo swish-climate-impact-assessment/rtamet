@@ -41,8 +41,8 @@ Version: 0.1
 Date: 2013-09-02
 Author: ivanhanigan
 Maintainer: <ivan.hanigan@gmail.com>
-Depends: plyr
-Description: R versions of  TAMET meteorology data checking tools
+Depends: foreign
+Description: R versions of  TAMET meteorology data checking tools  (was originally developed by APSIM).
 License: GPL (>= 2)
 
 #+end_src
@@ -71,6 +71,10 @@ License: GPL (>= 2)
   Tamet examines your met data for a variety of problems. These checks come in two flavours, bounds and discontinuities.
   
   The variable is tested against upper and lower bounds and any transgression is logged.
+
+The aim of this package is to make the TAMET tools for checking Meteorological data available to R users.
+
+The TAMET program (http://www.apsim.info/Products/Utilities.aspx) was originally developed by APSIM, especially  P deVoil and  J Hargreaves based on the work of B. H. Wall of the CSIRO Div. of Tropical Crops and Pastures in 1977. It performs a range of checks on weather files for consistency.
   }
   \details{
   \tabular{ll}{
@@ -231,7 +235,7 @@ Ivan Hanigan
         )
       input_df  <- subset(input_df, any_transgressions > 0)
       extension  <- get_file_extension(fpath)
-      logname  <- gsub(extension, paste("qc_transgressions_logged.", extension, sep = ""), fpath)
+      logname  <- gsub(extension, "qc_transgressions_logged.csv",  fpath)
       write.csv(input_df, logname, row.names=FALSE)
       cat(sprintf("Transgressions logged and written to:\n%s", logname))
       invisible(logname)
@@ -273,7 +277,7 @@ Ivan Hanigan
   %- maybe also 'usage' for other objects documented here.
   \arguments{
     \item{filename}{
-      either a path or file in current directory (log will be written alongside this file)
+      either a path or file in current directory (log will be written to a CSV with same name alongside this file)
   %%     ~~Describe \code{x} here~~
   }
       \item{MaxT_column}{

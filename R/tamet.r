@@ -29,7 +29,7 @@ tamet  <- function(filename, MaxT_column = NA,
       )
     input_df  <- subset(input_df, any_transgressions > 0)
     extension  <- get_file_extension(fpath)
-    logname  <- gsub(extension, paste("qc_transgressions_logged.", extension, sep = ""), fpath)
+    logname  <- gsub(extension, "qc_transgressions_logged.csv",  fpath)
     write.csv(input_df, logname, row.names=FALSE)
     cat(sprintf("Transgressions logged and written to:\n%s", logname))
     invisible(logname)
