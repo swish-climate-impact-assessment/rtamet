@@ -53,9 +53,12 @@ Invisibly returns a list with number of rows in logfile and path to that file.
   require(rtamet)
   fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
   df  <- read_file(fpath)
-  logfile <- tamet(filename = fpath,MaxT_column = "maxave",MaxT_lower=4.0, MaxT_upper=40.0,
-                   MinT_column = "minave")
-  read_file(logfile[[2]])
+  log <- tamet(filename = fpath,MaxT_column = "maxave",
+               MinT_column = "minave",
+               Vprph09_column = "vprph09",
+               Vprph15_column = "vprph15"
+               )
+  head(read_file(logfile[[2]]))
   
   }
   % Add one or more standard keywords, see file 'KEYWORDS' in the

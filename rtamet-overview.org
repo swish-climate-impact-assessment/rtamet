@@ -208,12 +208,15 @@ Ivan Hanigan
   ################################################################
   # name:tamet
   require(rtamet)
-  tamet  <- function(filename, MaxT_column = NA,
+  tamet  <- function(filename,
+                     MaxT_column = NA,
                      MaxT_lower = 4.0,
                      MaxT_upper = 50.0,
                      MinT_column = NA,
                      MinT_lower = -12.5,
-                     MinT_upper = 32.0
+                     MinT_upper = 32.0,
+                     Vprph09_column = NA,
+                     Vprph15_column = NA
                      )
     {
       #### TODO Check Input File, especially column names and latitude  ####
@@ -222,20 +225,34 @@ Ivan Hanigan
   #   Discontinuity_in_minT
   #   Discontinuity_in_maxT
   #   MaxT_outside_limits
+      if(!is.na(MaxT_column))
+      {
       input_df  <- MaxT_outside_limits(input_data_frame = input_df,
                                        MaxT = MaxT_column,
                                        Upper = MaxT_upper,
                                        Lower = MaxT_lower
                                        )
+      }
   #   MinT_outside_limits
+      if(!is.na(MinT_column))
+      {
       input_df  <- MinT_outside_limits(input_data_frame = input_df,
                                        MinT = MinT_column,
                                        Upper = MinT_upper,
                                        Lower = MinT_lower
                                        )
+      }
   #   MaxT_greater_or_equal_MinT
   #   MaxT_is_close_to_MinT_and_not_ overcast
-  
+      #### Run Vapour Pressure Checks ####  
+  #   Vprph09_equal_vprph15
+      if(!is.na(Vprph09_column))
+      {
+      input_df <- vprph09_equal_vprph15(input_data_frame = input_df,
+                            Vprph09 = Vprph09_column,
+                            Vprph15 = Vprph15_column
+                            )
+      }
       #### write report ####
       input_df$any_transgressions  <- ifelse(
         rowSums(
@@ -256,20 +273,25 @@ Ivan Hanigan
 *** test-tamet
 #+name:tamet
 #+begin_src R :session *R* :tangle tests/test-tamet.r :exports none :eval no
-  ################################################################
-  # name:tamet
-  #require(rtamet)
-  # or
-  require(devtools)
-  load_all()
-  fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
-  fpath
-  df  <- read_file(fpath)
-  str(df)
-  #debug(tamet)
-  log <- tamet(filename = fpath,MaxT_column = "maxave", MinT_column = "minave")
-  log
-  #undebug(tamet)
+    ################################################################
+    # name:tamet
+    require(rtamet)
+    # or
+    #require(devtools)
+    #load_all()
+    fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
+    fpath
+    df  <- read_file(fpath)
+    str(df)
+    #debug(tamet)
+    log <- tamet(filename = fpath,MaxT_column = "maxave",
+                 MinT_column = "minave",
+                 Vprph09_column = "vprph09",
+                 Vprph15_column = "vprph15"
+                 )
+    log
+    head(read_file(log[[2]]))
+    #undebug(tamet)
 #+end_src
 *** man-tamet
 #+name:tamet
@@ -329,9 +351,12 @@ Invisibly returns a list with number of rows in logfile and path to that file.
   require(rtamet)
   fpath <- system.file("extdata", "Kaleen.csv", package="rtamet")
   df  <- read_file(fpath)
-  logfile <- tamet(filename = fpath,MaxT_column = "maxave",MaxT_lower=4.0, MaxT_upper=40.0,
-                   MinT_column = "minave")
-  read_file(logfile[[2]])
+  log <- tamet(filename = fpath,MaxT_column = "maxave",
+               MinT_column = "minave",
+               Vprph09_column = "vprph09",
+               Vprph15_column = "vprph15"
+               )
+  head(read_file(logfile[[2]]))
   
   }
   % Add one or more standard keywords, see file 'KEYWORDS' in the
@@ -404,5 +429,36 @@ Invisibly returns a list with number of rows in logfile and path to that file.
 #+begin_src R :session *R* :tangle no :exports none :eval no
 ################################################################
 # name:MinT_outside_limits
+
+#+end_src
+** vprph09_equal_vprph15
+*** R-vprph09_equal_vprph15
+#+name:vprph09_equal_vprph15
+#+begin_src R :session *R* :tangle R/vprph09_equal_vprph15.r :exports none :eval no
+    ################################################################
+    # name:vprph09_equal_vprph15
+    vprph09_equal_vprph15 <- function(input_data_frame,
+                                    Vprph09 = "vprph09",
+                                    Vprph15 = "vprph15")
+      {
+        # perform check
+        input_data_frame$vprph_equal_transgression  <- ifelse(input_data_frame[,Vprph09] == input_data_frame[,Vprph15], 1, 0)
+    
+        return(input_data_frame)
+      }
+    
+#+end_src
+*** test-vprph09_equal_vprph15
+#+name:vprph09_equal_vprph15
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:vprph09_equal_vprph15
+
+#+end_src
+*** man-vprph09_equal_vprph15
+#+name:vprph09_equal_vprph15
+#+begin_src R :session *R* :tangle no :exports none :eval no
+################################################################
+# name:vprph09_equal_vprph15
 
 #+end_src
