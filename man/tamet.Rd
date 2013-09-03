@@ -58,7 +58,7 @@ Invisibly returns a list with number of rows in logfile and path to that file.
                Vprph09_column = "vprph09",
                Vprph15_column = "vprph15"
                )
-  head(read_file(logfile[[2]]))
+  head(read_file(log[[2]]))
   
   }
   % Add one or more standard keywords, see file 'KEYWORDS' in the
