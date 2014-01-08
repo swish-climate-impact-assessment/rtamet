@@ -5,6 +5,6 @@ Version: 0.1
 Date: 2013-09-02
 Author: ivanhanigan
 Maintainer: <ivan.hanigan@gmail.com>
-Depends: foreign
+Depends: foreign, plyr, sqldf
 Description: R versions of  TAMET meteorology data checking tools  (was originally developed by APSIM).
 License: GPL (>= 2)
